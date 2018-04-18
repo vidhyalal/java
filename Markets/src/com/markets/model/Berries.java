@@ -3,10 +3,10 @@ package com.markets.model;
 import java.math.BigDecimal;
 
 public class Berries {
-	String title;
-	String description;
-	int kcal_per_100g;
-	BigDecimal unit_price;
+	private String title;
+	private String description;
+	private int kcal_per_100g;
+	private BigDecimal unit_price;
 	
 	public String getTitle() {
 		return title;

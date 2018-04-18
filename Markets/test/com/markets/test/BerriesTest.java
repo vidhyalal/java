@@ -31,8 +31,8 @@ public class BerriesTest {
 	@Test
 	public void test_scrap() throws IOException {
 		BigDecimal expected = new BigDecimal("4.72");
-		double bd = 4.72222;
-		Mockito.when(ws.getRoundedValue(bd)).thenReturn(expected);
+		double value = 4.72222;
+		Mockito.when(ws.getRoundedValue(value)).thenReturn(expected);
 	}
 
 	/**
@@ -40,22 +40,20 @@ public class BerriesTest {
 	 */
 	@Test
 	public void test_conn() throws IOException {
-		Connection con = Jsoup
-				.connect("https://jsainsburyplc.github.io/serverside-test/site/www.sainsburys.co.uk/webapp/wcs/stores/servlet/gb/groceries/berries-cherries-currants6039.html");
+		final String URL = "https://jsainsburyplc.github.io/serverside-test/site/www.sainsburys.co.uk/webapp/wcs/stores/servlet/gb/groceries/berries-cherries-currants6039.html";
+		Connection con = Jsoup.connect(URL);
 		Document doc = con.get();
 		assertTrue(doc.title().contains("Sainsbury"));
 
 	}
 
 	/**
-	 * Given an image link..Then method checks the connection
+	 * For an image link,below method checks the connection
 	 */
 	@Test
 	public void test_type() throws IOException {
-		Connection con = Jsoup
-				.connect(
-						"https://s2.googleusercontent.com/s2/favicons?domain=http://facebook.com/")
-				.ignoreContentType(true);
+		final String URL = "https://s2.googleusercontent.com/s2/favicons?domain=http://facebook.com/";
+		Connection con = Jsoup.connect(URL).ignoreContentType(true);
 		Document doc = con.get();
 		assertEquals(doc.title(), "");
 	}

@@ -3,7 +3,7 @@ package com.markets.parser;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,137 +17,145 @@ import com.markets.model.Berries;
 
 public class WebScraper {
 
-	public static void main(String[] args) {
+	public Map<String, Object> getWebPageContent() {
 		Document doc;
 		Berries item = new Berries();
-		WebScraper ws=new WebScraper();
-		Map<String,Object> resultMap=new HashMap<String,Object>();
-		List<String> resultList=new ArrayList<String>();
-		List<BigDecimal> priceList=new ArrayList<BigDecimal>();
+		WebScraper webScrap = new WebScraper();
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		List<String> resultList = new ArrayList<String>();
+		List<BigDecimal> priceList = new ArrayList<BigDecimal>();
+		final String URL = "https://jsainsburyplc.github.io/serverside-test/site/www.sainsburys.co.uk/webapp/wcs/stores/servlet/gb/groceries/berries-cherries-currants6039.html";
 		try {
-			doc = Jsoup
-					.connect(
-							"https://jsainsburyplc.github.io/serverside-test/site/www.sainsburys.co.uk/webapp/wcs/stores/servlet/gb/groceries/berries-cherries-currants6039.html")
-					.get();
+			doc = Jsoup.connect(URL).get();
 
 			Elements products = doc.select("div.productInfo");
-			Elements product_link_list = products.select("a[href]");
-			for (Element link : product_link_list) {
+			Elements productLinkList = products.select("a[href]");
+			for (Element link : productLinkList) {
 
-				// get the value from href attribute
-				String product_link = link.attr("href");
-				String product_title = link.text();
+				/**
+				 * get the link value from href attribute
+				 */
+				String productLink = link.attr("href");
+				String productTitle = link.text();
 
-					System.out.println("\n link : " + product_link);
-					System.out.println("title : " + product_title);
-					item.setTitle(product_title);
-					
-					String[] output=product_link.split("/shop");
-					System.out.println("2nd string"+"/shop"+output[1]);
-					String checkUrl="/shop"+output[1];
-					final String base_url="https://jsainsburyplc.github.io/serverside-test/site/www.sainsburys.co.uk";
-					String newUrl = "";
-							if (checkUrl.startsWith("/"))
-							{
-							    newUrl = base_url + checkUrl;
-							    System.out.println("URL is "+newUrl);
-							}
-							if (checkUrl.startsWith("http://"))
-							{
-							    newUrl = checkUrl;
-							}
-							if (checkUrl.startsWith("www"))
-							{						    
-								newUrl = "http://" + checkUrl;
-							}
-				// Follow each product link to get its details
-				Document specificDoc = Jsoup.connect(newUrl).get();
-				
-				//Each product description
-				Element each_product1 = specificDoc.select("div.productText").first()==null?null:specificDoc.select("div.productText").first();
-				String each_product_desc = "";
-				if(null!=each_product1 && !"".equals(each_product1))
-				{
-				each_product_desc = each_product1.select("p").first().text();
-				System.out.println("desc : " + each_product_desc);
-				}	
-				Element each_product2 = specificDoc.select("div.itemTypeGroupContainer productText").first()==null?null:specificDoc.select("div.itemTypeGroupContainer productText").first();
-				if(null!=each_product2 && !"".equals(each_product2))
-				{
-				each_product_desc = each_product2.select("p").first().text();
-				System.out.println("desc : " + each_product_desc);
+				item.setTitle(productTitle);
+				String[] output = productLink.split("/shop");
+				String checkUrl = "/shop" + output[1];
+				final String baseUrl = "https://jsainsburyplc.github.io/serverside-test/site/www.sainsburys.co.uk";
+				String newUrl = "";
+				if (checkUrl.startsWith("/")) {
+					newUrl = baseUrl + checkUrl;
 				}
-				item.setDescription(each_product_desc);
-				
-				//Each product kcal
-				Element each_pdt_kcal = specificDoc.select("table.nutritionTable").first()==null?null:specificDoc.select("table.nutritionTable").first();
-				int kcal_per_100g=0;
-				if(null!=each_pdt_kcal && !"".equals(each_pdt_kcal))
-				{
-					 Element table = specificDoc.select("table").get(0); 
-					    Elements rows = table.select("tr");
-					    for (int i = 1; i < rows.size(); i++) { 
-					    	Element row = rows.get(i);
-					        Elements cols = row.select("td");
-					        Elements th = row.select("th");
-					        if(cols.first().text().contains("kcal"))
-					        {
-					        	String[] kcalList=cols.first().text().split("kcal");
-					        	System.out.println("kcal is "+kcalList[0]);
-					        	kcal_per_100g=Integer.parseInt(kcalList[0]);
-					        	item.setKcal_per_100g(kcal_per_100g);
-					        	
-					        }
-					        else if(th.first().text().contains("kcal"))
-					        {
-					        	String[] kcalList=cols.first().text().split("kcal");
-					        	System.out.println("kcal is "+kcalList[0]);
-					        	kcal_per_100g=Integer.parseInt(kcalList[0]);
-					        	item.setKcal_per_100g(kcal_per_100g);
-					        }
-					    }
-				}	
-				
-				//Each product price
-				String price_per_unit = specificDoc.select("p.pricePerUnit").first().text();
-				price_per_unit=price_per_unit.substring(1);
-				String[] price_list=price_per_unit.split("/unit");
-				System.out.println("Price per unit "+price_list[0]);
-				double unit_price=Double.parseDouble(price_list[0]);
-				BigDecimal price=ws.getRoundedValue(unit_price);
+				if (checkUrl.startsWith("http://")) {
+					newUrl = checkUrl;
+				}
+				if (checkUrl.startsWith("www")) {
+					newUrl = "http://" + checkUrl;
+				}
+				/**
+				 * Follow each product link to get its details
+				 */
+				Document specificDoc = Jsoup.connect(newUrl).get();
+
+				/**
+				 * Each product description
+				 */
+				Element eachProduct1 = specificDoc.select("div.productText")
+						.first() == null ? null : specificDoc.select(
+						"div.productText").first();
+				String eachProductDesc = "";
+				if (null != eachProduct1 && !"".equals(eachProduct1)) {
+					eachProductDesc = eachProduct1.select("p").first().text();
+				}
+				Element eachProduct2 = specificDoc.select(
+						"div.itemTypeGroupContainer productText").first() == null ? null
+						: specificDoc.select(
+								"div.itemTypeGroupContainer productText")
+								.first();
+				if (null != eachProduct2 && !"".equals(eachProduct2)) {
+					eachProductDesc = eachProduct2.select("p").first().text();
+				}
+				item.setDescription(eachProductDesc);
+
+				/**
+				 * Each product kcal
+				 */
+				Element each_pdt_kcal = specificDoc.select(
+						"table.nutritionTable").first() == null ? null
+						: specificDoc.select("table.nutritionTable").first();
+				int kcal_per_100g = 0;
+				if (null != each_pdt_kcal && !"".equals(each_pdt_kcal)) {
+					Element table = specificDoc.select("table").get(0);
+					Elements rows = table.select("tr");
+					for (int i = 1; i < rows.size(); i++) {
+						Element row = rows.get(i);
+						Elements cols = row.select("td");
+						Elements th = row.select("th");
+						if (cols.first().text().contains("kcal")) {
+							String[] kcalList = cols.first().text()
+									.split("kcal");
+							kcal_per_100g = Integer.parseInt(kcalList[0]);
+							item.setKcal_per_100g(kcal_per_100g);
+
+						} else if (th.first().text().contains("kcal")) {
+							String[] kcalList = cols.first().text()
+									.split("kcal");
+							kcal_per_100g = Integer.parseInt(kcalList[0]);
+							item.setKcal_per_100g(kcal_per_100g);
+						}
+					}
+				}
+
+				/**
+				 * Each product price
+				 */
+				String pricePerUnit = specificDoc.select("p.pricePerUnit")
+						.first().text();
+				pricePerUnit = pricePerUnit.substring(1);
+				String[] price_list = pricePerUnit.split("/unit");
+				double unitPrice = Double.parseDouble(price_list[0]);
+				BigDecimal price = webScrap.getRoundedValue(unitPrice);
 				item.setUnit_price(price);
 				priceList.add(price);
-				
-				//Json conversion
+
+				/**
+				 * Json conversion
+				 */
 				ObjectMapper mapper = new ObjectMapper();
-				String jsonString = mapper.writeValueAsString(item) ;
-				System.out.println(jsonString);
+				String jsonString = mapper.writeValueAsString(item);
 				resultList.add(jsonString);
-				
-		} 
-			BigDecimal total=ws.getSumValue(priceList);
-			total=ws.getRoundedValue(Double.parseDouble(total.toString()));
-			resultMap.put("results",resultList);
-			resultMap.put("total",total);
-			System.out.println("ResultJson "+resultMap);
-		}
-		catch (Exception e) {
+
+			}
+			BigDecimal total = webScrap.getSumValue(priceList);
+			total = webScrap.getRoundedValue(Double.parseDouble(total
+					.toString()));
+			resultMap.put("results", resultList);
+			resultMap.put("total", total);
+
+		} catch (Exception e) {
 			System.out.println("Exception is " + e);
 		}
-	}
-	
-	
-	public BigDecimal getRoundedValue(double value) {
-		int places = 2;
-		BigDecimal bd = new BigDecimal(value);
-		bd = bd.setScale(places, RoundingMode.HALF_UP);
-		return bd;
+
+		return resultMap;
 	}
 
+	/**
+	 * Rounding each value to 2 decimals
+	 */
+	public BigDecimal getRoundedValue(double value) {
+		int places = 2;
+		BigDecimal roundValue = new BigDecimal(value);
+		roundValue = roundValue.setScale(places, RoundingMode.HALF_UP);
+		return roundValue;
+	}
+
+	/**
+	 * Get total price
+	 */
 	public BigDecimal getSumValue(List<BigDecimal> priceList) {
 		BigDecimal sum = new BigDecimal(0);
-		for (BigDecimal d : priceList) {
-			sum = sum.add(d);
+		for (BigDecimal price : priceList) {
+			sum = sum.add(price);
 		}
 		return sum;
 	}

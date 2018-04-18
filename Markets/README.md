@@ -16,7 +16,12 @@ Berries class is the model.
 ## Tests:
   The tests are written in Junit.This is achieved by writing cucumber stories and translating them to step definitions.
 
-There are 3 tests written in the BerriesTest.java.
+There are 3 tests written in the BerriesTest.
 
 Give, When and Then are used for one of the test case.
+
+## Build the project:
+Check out/clone the project.
+Run mvn clean install.
+
 
