@@ -1,13 +1,17 @@
 package com.markets.parser;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+/**
+ * This class invokes another class to get a web page content
+ * 
+ * @author Vidhya
+ * @version 1.0
+ */
 
 public class MainClass {
 
 	public static void main(String[] args) {
 		WebScraper scrap = new WebScraper();
-		Map<String, Object> resultJson = new LinkedHashMap<String, Object>();
+		String resultJson = "";
 		resultJson = scrap.getWebPageContent();
 		System.out.println("ResultJson " + resultJson);
 	}
